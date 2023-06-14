@@ -11,7 +11,7 @@
 from .common import Extractor, Message
 from .. import text, util, exception
 import re
-import json
+
 
 class BcyExtractor(Extractor):
     """Base class for bcy extractors"""
@@ -32,27 +32,19 @@ class BcyExtractor(Extractor):
                          r"(?:-sign\.bcyimg\.com|\.byteimg\.com/img)"
                          r"/banciyuan").sub
         iroot = "https://img-bcy-qn.pstatp.com"
-        # noop = self.config("noop")
+        noop = self.config("noop")
 
         for post in self.posts():
-            post_id = post['item_id']
-
             if not post["image_list"]:
                 continue
 
             multi = None
             tags = post.get("post_tags") or ()
-            # print(post)
-            # print()
-            # print()
             data = {
                 "user": {
                     "id"     : post["uid"],
                     "name"   : post["uname"],
                     "avatar" : sub(iroot, post["avatar"].partition("~")[0]),
-                    # "utags"  : [utag["ut_name"] for utag in post["utags"]],
-                    # "utags"  : [utag.get("ut_name", None) for utag in post.get("utags", [])],
-
                 },
                 "post": {
                     "id"     : text.parse_int(post["item_id"]),
@@ -63,27 +55,18 @@ class BcyExtractor(Extractor):
                     "likes"  : post["like_count"],
                     "shares" : post["share_count"],
                     "replies": post["reply_count"],
-                    "image_list": post["image_list"],
                 },
-                # "collection": post["collection"],
-                # "item_like_users": [{"uname": user["uname"], "uid": user["uid"]} for user in post["item_like_users"]],
             }
-
-#             if post.get("utags", None) is not None:
-#                 data["user"]["utags"] = [utag["ut_name"] for utag in post["utags"]]
-
             if post.get("item_like_users", None) is not None:
                 data["post"]["item_like_users"] = [{"uname": user["uname"], "uid": user["uid"]} for user in post["item_like_users"]]
 
             data["collection"] = post.get("collection", None)
-
             yield Message.Directory, data
             for data["num"], image in enumerate(post["image_list"], 1):
                 data["id"] = image["mid"]
                 data["width"] = image["w"]
                 data["height"] = image["h"]
 
-                # Updated the url to use "original_path" instead of "path"
                 url = image["original_path"].partition("~")[0]
                 text.nameext_from_url(url, data)
 
@@ -106,21 +89,6 @@ class BcyExtractor(Extractor):
                         data["filter"] = "noop"
                         data["orig_path"] = image["original_path"]
                         yield Message.Url, image["original_path"], data
-
-    def posts(self):
-        """Returns an iterable with all relevant 'post' objects"""
-
-    def _data_from_post(self, post_id):
-        url = "{}/item/detail/{}".format(self.root, post_id)
-        page = self.request(url, notfound="post").text
-        data = (text.extr(page, 'JSON.parse("', '");')
-                .replace('\\\\u002F', '/')
-                .replace('\\"', '"'))
-        try:
-            return util.json_loads(data)["detail"]
-        except ValueError:
-            return util.json_loads(data.replace('\\"', '"'))["detail"]
-
 
     def posts(self):
         """Returns an iterable with all relevant 'post' objects"""
