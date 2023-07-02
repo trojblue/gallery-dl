@@ -395,6 +395,7 @@ Description
     * ``tapas``
     * ``tsumino``
     * ``twitter``
+    * ``vipergirls``
     * ``zerochan``
 
     These values can also be specified via the
@@ -1540,6 +1541,27 @@ Description
     from `linking your Flickr account to gallery-dl <OAuth_>`__.
 
 
+extractor.flickr.metadata
+-------------------------
+Type
+    * ``bool``
+    * ``string``
+    * ``list`` of ``strings``
+Default
+    ``false``
+Example
+    * ``license,last_update,machine_tags``
+    * ``["license", "last_update", "machine_tags"]``
+Description
+    Extract additional metadata
+    (license, date_taken, original_format, last_update, geo, machine_tags, o_dims)
+
+    It is possible to specify a custom list of metadata includes.
+    See `the extras parameter <https://www.flickr.com/services/api/flickr.people.getPhotos.html>`__
+    in `Flickr API docs <https://www.flickr.com/services/api/>`__
+    for possible field names.
+
+
 extractor.flickr.videos
 -----------------------
 Type
@@ -2410,7 +2432,12 @@ Description
     when processing a user profile.
 
     Possible values are
-    ``"artworks"``, ``"avatar"``, ``"background"``, ``"favorite"``.
+    ``"artworks"``,
+    ``"avatar"``,
+    ``"background"``,
+    ``"favorite"``,
+    ``"novel-user"``,
+    ``"novel-bookmark"``.
 
     It is possible to use ``"all"`` instead of listing all values separately.
 
@@ -2996,15 +3023,19 @@ Description
 extractor.twitter.conversations
 -------------------------------
 Type
-    ``bool``
+    * ``bool``
+    * ``string``
 Default
     ``false``
 Description
     For input URLs pointing to a single Tweet,
     e.g. `https://twitter.com/i/web/status/<TweetID>`,
     fetch media from all Tweets and replies in this `conversation
-    <https://help.twitter.com/en/using-twitter/twitter-conversations>`__
-    or thread.
+    <https://help.twitter.com/en/using-twitter/twitter-conversations>`__.
+
+    If this option is equal to ``"accessible"``,
+    only download from conversation Tweets
+    if the given initial Tweet is accessible.
 
 
 extractor.twitter.csrf
